@@ -1,0 +1,68 @@
+# config/discord-security.yml
+# GUÍA DE CONFIGURACIÓN SEGURA PARA DISCORD
+
+application:
+  name: "VEXO RP Secure"
+  public: false
+  bot_public: false
+  require_code_grant: true
+
+oauth2:
+  scopes:
+    required:
+      - identify
+      - email
+    optional: []
+    dangerous: # NO USAR ESTOS
+      - bot
+      - guilds.join
+      - webhook.incoming
+      - applications.commands
+  
+  redirect_uris:
+    development:
+      - http://localhost:5173/auth/callback
+    production:
+      - https://tudominio.com/auth/callback
+  
+  # Validación de estado para prevenir CSRF
+  use_state_validation: true
+
+bot_permissions: # Solo si necesitas bot
+  recommended:
+    - SEND_MESSAGES
+    - VIEW_CHANNEL
+    - READ_MESSAGE_HISTORY
+  
+  dangerous: # EVITAR ESTOS
+    - ADMINISTRATOR
+    - KICK_MEMBERS
+    - BAN_MEMBERS
+    - MANAGE_CHANNELS
+    - MANAGE_GUILD
+
+security:
+  # Limitar a servidores específicos
+  allowed_guild_ids:
+    - "123456789012345678" # Tu server ID
+  
+  # Webhook seguridad
+  webhooks:
+    require_verification: true
+    ip_whitelist: [] # Añadir IPs de tu servidor
+  
+  # Rate limiting propio
+  max_auth_attempts_per_ip: 5
+  block_duration_minutes: 60
+
+monitoring:
+  # Webhooks para notificaciones de seguridad
+  alert_webhook: "https://discord.com/api/webhooks/..."
+  log_channel_id: "123456789012345678"
+  
+  # Qué monitorear
+  monitor:
+    - failed_logins
+    - new_registrations
+    - role_changes
+    - credential_creations
