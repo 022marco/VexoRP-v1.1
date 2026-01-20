@@ -1,54 +1,45 @@
-// backend/src/server.js
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const passport = require('passport');
 const cors = require('cors');
-
-// Importar configuración de passport
-require('./config/passport');
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Middlewares
+// Middlewares básicos
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: ['https://022marco.github.io', 'http://localhost:5173'],
   credentials: true
 }));
-
 app.use(express.json());
-app.use(passport.initialize());
 
-// Conectar a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vexo_secure')
-  .then(() => console.log('✅ Conectado a MongoDB'))
-  .catch(err => console.error('❌ Error MongoDB:', err));
-
-// Importar rutas 
-const authRoutes = require('./routes/authRoutes'); // Cambia si tu archivo se llama diferente
-
-// Usar rutas
-app.use('/api/auth', authRoutes);
-
-// Ruta de salud
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'VEXO API funcionando',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+// Ruta RAÍZ - OBLIGATORIA para Render
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 VexoRP Backend API v1.1',
+    status: 'ACTIVE',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: '/api/auth',
+      health: '/health'
+    }
   });
 });
 
-// Iniciar servidor
+// Ruta de salud
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy',
+    uptime: process.uptime()
+  });
+});
+
+// Ruta de prueba
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API working correctly!' });
+});
+
+// Puerto dinámico (Render asigna uno automático)
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`
-    🔐 VEXO BACKEND SEGURO
-    ======================
-    ✅ Puerto: ${PORT}
-    ✅ Modo: ${process.env.NODE_ENV || 'development'}
-    📍 API: http://localhost:${PORT}/api
-    📍 Health: http://localhost:${PORT}/api/health
-    📍 Discord Auth: http://localhost:${PORT}/api/auth/discord
-  `);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🔗 http://localhost:${PORT}`);
 });
